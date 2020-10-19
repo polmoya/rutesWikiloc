@@ -9,30 +9,20 @@ import requests
 from bs4 import BeautifulSoup
 import random
 import sys
-
-'''
-activitat=sys.argv[1]
-pais=sys.argv[2]
-regio1=sys.argv[3]
-regio2=sys.argv[4]
-'''
-#Paràmetres prova
-activitat='outdoor'
-pais='andorra'
-regio1='canillo'
-regio2='el-tarter'
-
-
+#Variables globals:
+#Agent lists per simular que s'accedeix a la url des d'un navegador normal
 user_agent_list = [
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
-    #'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
-]
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+        #'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
+    ]
 
+#Funció que ens escull un user_agent aleatòri
 user_agent = random.choice(user_agent_list)
+#headers que ens ajuden a simular que l'accés el fa una persona normal i evitem els anti web scraping.
 headers = {"User-Agent":user_agent,
            "Accept-Language":"ca",
            "Accept-Encoding":"gzip, deflate", 
@@ -40,13 +30,31 @@ headers = {"User-Agent":user_agent,
            "DNT":"1","Connection":"close", "Upgrade-Insecure-Requests":"1",
            "Referer": "http://www.google.com/"}
 
-url_principal = 'https://ca.wikiloc.com/rutes/'+activitat+'/'+pais+'/'+regio1+'/'+regio2
-print('Url principal: '+url_principal)
+def main():
+    '''
+    #Llegim els arguments
+    activitat=sys.argv[1]
+    pais=sys.argv[2]
+    regio1=sys.argv[3]
+    regio2=sys.argv[4]
+    '''
+    #Paràmetres per a testejar
+    activitat='outdoor'
+    pais='andorra'
+    regio1='canillo'
+    regio2='el-tarter'
+    
+    
+    url_principal = 'https://ca.wikiloc.com/rutes/'+activitat+'/'+pais+'/'+regio1+'/'+regio2
+    print('Url principal: '+url_principal)
+    
+    #page = requests.get(url_principal, headers=headers)
+    #soup = BeautifulSoup(page.content, features="lxml")
+    #print(soup.prettify())
 
-page = requests.get(url_principal, headers=headers)
-soup = BeautifulSoup(page.content, features="lxml")
-#print(soup.prettify())
-
+    url_rutes = buscar_urls(url_principal)
+    print(url_rutes)
+    print(len(url_rutes))
 
 def buscar_urls(url_principal):
     #Funció que recorre totes les pàgines de la url_principal i retorna les url de les rutes trobades.
@@ -65,7 +73,5 @@ def buscar_urls(url_principal):
             actual_page = next.get('href')
     return(url_rutes)
         
-url_rutes = buscar_urls(url_principal)
-print(url_rutes)
-print(len(url_rutes))
+main()
  
