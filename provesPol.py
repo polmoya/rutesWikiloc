@@ -46,15 +46,16 @@ def main():
     
     
     url_principal = 'https://ca.wikiloc.com/rutes/'+activitat+'/'+pais+'/'+regio1+'/'+regio2
-    print('Url principal: '+url_principal)
+    print('Url principal: '+url_principal) #Test
     
     #page = requests.get(url_principal, headers=headers)
     #soup = BeautifulSoup(page.content, features="lxml")
     #print(soup.prettify())
 
-    url_rutes = buscar_urls(url_principal)
+    url_rutes = buscar_urls_valorades(url_principal)
     print(url_rutes)
     print(len(url_rutes))
+
 
 def buscar_urls(url_principal):
     #Funció que recorre totes les pàgines de la url_principal i retorna les url de les rutes trobades.
@@ -63,7 +64,7 @@ def buscar_urls(url_principal):
     actual_page = ''
     while next != None: 
         url_actual = url_principal + actual_page
-        print(url_actual)
+        print(url_actual) #Test
         page = requests.get(url_actual, headers=headers)
         soup = BeautifulSoup(page.content, features="lxml")
         for link in soup.find(id="trails").find_all('a', 'trail-title'):
@@ -72,6 +73,32 @@ def buscar_urls(url_principal):
         if next != None:
             actual_page = next.get('href')
     return(url_rutes)
+
+#ToDo: No es potparar busqueda si es fa per valoració perquè al ordenar per rellevància ho ordena pel TrailRank
+# que no es pot accedir sense accedir a l'activitat.
+def buscar_urls_valorades(url_principal):
+    #Funció que recorre totes les pàgines de la url_principal i retorna les url de les rutes trobades.
+    url_rutes = []
+    next = ''
+    actual_page = '?s=trailrank'
+    #Iterem disposem de pàgines.
+    while next != None: 
+        url_actual = url_principal + actual_page
+        #print(url_actual) #Test
+        page = requests.get(url_actual, headers=headers)
+        soup = BeautifulSoup(page.content, features="lxml")
         
+        for row in soup.find(id="trails").find_all_next('div', 'row'):
+            #print(row.find('a', 'rating-container')) #Test
+            if row.find('a', 'rating-container') != None:
+                url_rutes.append(row.find('a', 'trail-title').get('href'))
+        next = soup.find('a', 'next')
+        if next != None:
+            actual_page = next.get('href')
+            
+    return(url_rutes)
+ 
+
+       
 main()
  
