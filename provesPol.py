@@ -4,7 +4,7 @@ Created on Mon Oct 19 15:36:35 2020
 
 @author: moyap
 """
-
+import datetime
 import requests
 from bs4 import BeautifulSoup
 import random
@@ -30,6 +30,9 @@ headers = {"User-Agent":user_agent,
            "DNT":"1","Connection":"close", "Upgrade-Insecure-Requests":"1",
            "Referer": "http://www.google.com/"}
 
+initDate:datetime;
+elapsed:float;
+
 def main():
     '''
     #Llegim els arguments
@@ -39,22 +42,36 @@ def main():
     regio2=sys.argv[4]
     '''
     #Paràmetres per a testejar
-    activitat='outdoor'
-    pais='andorra'
-    regio1='canillo'
-    regio2='el-tarter'
+    activitat='/outdoor'
+    pais=''
+    regio1=''
+    regio2=''
+    
+    initDate = datetime.datetime.now();
+    fileLog = open('ProvesPol.log','a');
+    fileLog.write(str(datetime.datetime.now()) + ' ======== Start The Web Scrapping =========\n');
     
     
-    url_principal = 'https://ca.wikiloc.com/rutes/'+activitat+'/'+pais+'/'+regio1+'/'+regio2
+    url_principal = 'https://ca.wikiloc.com/rutes' + activitat + pais + regio1 + regio2
     print('Url principal: '+url_principal) #Test
+    fileLog.write('Url principal -> '+ url_principal + '\n');
     
     #page = requests.get(url_principal, headers=headers)
     #soup = BeautifulSoup(page.content, features="lxml")
     #print(soup.prettify())
 
     url_rutes = buscar_urls_valorades(url_principal)
-    print(url_rutes)
-    print(len(url_rutes))
+    
+    for link in url_rutes:
+        print('URL -> ' + link) 
+        fileLog.write('URL -> ' + link + '\n');
+        
+    print('Total rutes -> ' + str(len(url_rutes)))
+    
+    elapsed = (datetime.datetime.now() - initDate).total_seconds();
+    fileLog.write(str(datetime.datetime.now()) + ' ======== Elapsed Time: ' + str(elapsed) + '=========\n');
+    fileLog.write(str(datetime.datetime.now()) + ' ======== End The Web Scrapping =========\n');
+    fileLog.close()
 
 
 def buscar_urls(url_principal):
