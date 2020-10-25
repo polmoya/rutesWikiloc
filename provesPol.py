@@ -39,32 +39,55 @@ def main():
     regio2=sys.argv[4]
     '''
     #Paràmetres per a testejar
-    activitat='outdoor'
-    pais='andorra'
-    regio1='canillo'
-    regio2='el-tarter'
+    activitat='btt'
+    pais='/andorra'
+    regio1='/canillo'
+    regio2=''
     
     
-    url_principal = 'https://ca.wikiloc.com/rutes/'+activitat+'/'+pais+'/'+regio1+'/'+regio2
+    url_principal = 'https://ca.wikiloc.com/rutes/'+activitat+pais+regio1+regio2
     print('Url principal: '+url_principal) #Test
     
     #page = requests.get(url_principal, headers=headers)
     #soup = BeautifulSoup(page.content, features="lxml")
     #print(soup.prettify())
 
-    url_rutes = buscar_urls_valorades(url_principal)
-    print(url_rutes)
-    print(len(url_rutes))
+    #url_rutes = []
+    #url_rutes = buscar_urls_valorades(url_principal, url_rutes)
+    
+   
+    url_rutes_get = []
+    url_rutes_get = get_urls(activitat, pais, regio1, regio2, url_rutes_get)
+    
+    url_rutes_buscar = []
+    url_rutes_buscar = buscar_urls(url_principal, url_rutes_buscar)
+    
+    print(url_rutes_get)
+    print(url_rutes_buscar)
+    print('Url rutes get: '+str(len(url_rutes_get)))
+    print('Url rutes buscar: '+str(len(url_rutes_buscar)))
 
+def get_urls(activitat, pais, regio1, regio2, url_rutes):
+    #Funció que accedeix als filtres i va avançant per aquest per tal d'aconseguir totes les urls de les rutes
+    url_base = 'https://ca.wikiloc.com/rutes/'+activitat+'/'+pais+regio1
+    page1 = requests.get(url_base, headers=headers)
+    soup1 = BeautifulSoup(page1.content, features="lxml")
+    ul = soup1.find(id="filters").find('ul')
+    for link in ul.find_all('a'):
+        #Substituim 'outdoor' per l'activitat per accedir a la ruta correcta
+        url = str.replace(link.get('href'), 'outdoor', activitat)
+        print(url)
+        buscar_urls(url, url_rutes) 
+    return url_rutes    
+        
 
-def buscar_urls(url_principal):
+def buscar_urls(url_principal, url_rutes):
     #Funció que recorre totes les pàgines de la url_principal i retorna les url de les rutes trobades.
-    url_rutes = []
     next = ''
     actual_page = ''
     while next != None: 
         url_actual = url_principal + actual_page
-        print(url_actual) #Test
+        #print(url_actual) #Test
         page = requests.get(url_actual, headers=headers)
         soup = BeautifulSoup(page.content, features="lxml")
         for link in soup.find(id="trails").find_all('a', 'trail-title'):
@@ -76,9 +99,8 @@ def buscar_urls(url_principal):
 
 #ToDo: No es potparar busqueda si es fa per valoració perquè al ordenar per rellevància ho ordena pel TrailRank
 # que no es pot accedir sense accedir a l'activitat.
-def buscar_urls_valorades(url_principal):
+def buscar_urls_valorades(url_principal, url_rutes):
     #Funció que recorre totes les pàgines de la url_principal i retorna les url de les rutes trobades.
-    url_rutes = []
     next = ''
     actual_page = '?s=trailrank'
     #Iterem disposem de pàgines.
