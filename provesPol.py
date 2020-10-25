@@ -68,7 +68,8 @@ def main():
     #print(soup.prettify())
 
 
-    url_rutes = buscar_urls_valorades(url_principal)
+    url_rutes = []
+    url_rutes = buscar_urls_valorades(url_principal, url_rutes)
     
     for link in url_rutes:
         print('URL -> ' + link) 
@@ -107,26 +108,8 @@ def get_urls(activitat, pais, regio1, regio2, url_rutes):
         print(url)
         buscar_urls(url, url_rutes) 
     return url_rutes    
-        
-
-def buscar_urls(url_principal, url_rutes):
-    #Funció que recorre totes les pàgines de la url_principal i retorna les url de les rutes trobades.
-    next = ''
-    actual_page = ''
-    while next != None: 
-        url_actual = url_principal + actual_page
-        #print(url_actual) #Test
-        page = requests.get(url_actual, headers=headers)
-        soup = BeautifulSoup(page.content, features="lxml")
-        for link in soup.find(id="trails").find_all('a', 'trail-title'):
-            url_rutes.append(link.get('href'))    
-        next = soup.find('a', 'next')
-        if next != None:
-            actual_page = next.get('href')
-    return(url_rutes)
-
-#ToDo: No es potparar busqueda si es fa per valoració perquè al ordenar per rellevància ho ordena pel TrailRank
-# que no es pot accedir sense accedir a l'activitat.
+ 
+    
 def buscar_urls_valorades(url_principal, url_rutes):
     #Funció que recorre totes les pàgines de la url_principal i retorna les url de les rutes trobades.
     next = ''
@@ -147,6 +130,26 @@ def buscar_urls_valorades(url_principal, url_rutes):
             actual_page = next.get('href')
             
     return(url_rutes)
+    
+
+def buscar_urls(url_principal, url_rutes):
+    #Funció que recorre totes les pàgines de la url_principal i retorna les url de les rutes trobades.
+    next = ''
+    actual_page = ''
+    while next != None: 
+        url_actual = url_principal + actual_page
+        #print(url_actual) #Test
+        page = requests.get(url_actual, headers=headers)
+        soup = BeautifulSoup(page.content, features="lxml")
+        for link in soup.find(id="trails").find_all('a', 'trail-title'):
+            url_rutes.append(link.get('href'))    
+        next = soup.find('a', 'next')
+        if next != None:
+            actual_page = next.get('href')
+    return(url_rutes)
+
+
+
  
 
        
