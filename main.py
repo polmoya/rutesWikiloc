@@ -51,13 +51,13 @@ def main():
     regio1=sys.argv[3]
     regio2=sys.argv[4]
     '''
-    #Paràmetres per a testejar
+    #ToDo: Adaptar! Paràmetres per a testejar
     activitat='sender-accessible'
     pais=''
     regio1=''
     regio2=''
     
-    #Es normalitzen els arguments
+    #Es normalitzen els arguments afegint la / per a accedir a la url
     if (pais != ''):
         pais = '/'+pais
     if (regio1 != ''):
