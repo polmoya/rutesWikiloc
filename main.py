@@ -33,7 +33,7 @@ headers = {"User-Agent":user_agent,
 
 initDate:datetime;
 elapsed:float;
-fileLog = fileLog = open('ProvesPol.log','a');
+fileLog = fileLog = open('main.log','a');
 
 
 def main():
@@ -52,8 +52,8 @@ def main():
     regio2=sys.argv[4]
     '''
     #Paràmetres per a testejar
-    activitat='senderisme'
-    pais='andorra'
+    activitat='sender-accessible'
+    pais=''
     regio1=''
     regio2=''
     
@@ -81,7 +81,7 @@ def main():
     except Exception as e:
         raise e;
 
-#Funcio que agafa totes les regions per les quals es pot filtrar
+#Mètode que retorna les urls amb id="filters" que pertanyen a una regió.
 def get_urls_filter(url_base, activitat):
     try:
         page = requests.get(url_base, headers=headers)
@@ -104,7 +104,7 @@ def get_urls_filter(url_base, activitat):
         return urls_filter    
     
 
-#Funció que accedeix als filtres i va avançant per aquest per tal d'aconseguir totes les urls de les rutes
+#Mètode que retorna totes les urls de les rutes filtrades per activitat, país, regio1 i regio2.
 def get_urls(activitat, pais, regio1, regio2):
      #Rutes regio2
     if (regio2 != ''):
@@ -121,16 +121,18 @@ def get_urls(activitat, pais, regio1, regio2):
             url_rutes_regio1 = url_rutes_regio1 + buscar_urls_valorades(url)
         return url_rutes_regio1
     #Rutes pais
-    url_base = 'https://ca.wikiloc.com/rutes/'+activitat+pais
-    urls_filter_pais = get_urls_filter(url_base, activitat)
-    url_rutes_pais = []
-    for url_regio1 in urls_filter_pais:
-        urls_regio2 = get_urls_filter(url_regio1, activitat)
-        for url_regio2 in urls_regio2:
-            url_rutes_pais = url_rutes_pais + buscar_urls_valorades(url_regio2)
-    return url_rutes_pais    
+    if (pais != ''):
+        url_base = 'https://ca.wikiloc.com/rutes/'+activitat+pais
+        urls_filter_pais = get_urls_filter(url_base, activitat)
+        url_rutes_pais = []
+        for url_regio1 in urls_filter_pais:
+            urls_regio2 = get_urls_filter(url_regio1, activitat)
+            for url_regio2 in urls_regio2:
+                url_rutes_pais = url_rutes_pais + buscar_urls_valorades(url_regio2)
+        return url_rutes_pais  
+    return buscar_urls_valorades('https://ca.wikiloc.com/rutes/'+activitat)  
  
-#Funció que recorre totes les pàgines de la url_principal i retorna les url de les rutes valorades.    
+#Mètode que recorre totes les pàgines de la url_principal i retorna les url de les rutes valorades.    
 def buscar_urls_valorades(url_principal):
     next = ''
     actual_page = ''
