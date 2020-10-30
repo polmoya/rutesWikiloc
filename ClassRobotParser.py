@@ -15,8 +15,8 @@ class RobotParser(object):
         self.robotParser:Protego = None;
         RobotParser.robotsUrl = paramUrl;
         RobotParser.userAgent = paramUserAgent;
-        print('Robots.txt: ' + RobotParser.robotsUrl + '\n');
-        print('User Agent: ' + RobotParser.userAgent + '\n')
+        #print('Robots.txt: ' + RobotParser.robotsUrl + '\n');
+        #print('User Agent: ' + RobotParser.userAgent + '\n')
        
     def create (self) -> Protego:
         try:

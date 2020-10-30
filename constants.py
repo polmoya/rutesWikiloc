@@ -18,7 +18,7 @@ LEVEL1 = 'Level1';
 ATTR_TITLE = 'title';
 ATTR_TRAILRANK = 'TrailRank';
 
-PATHCSVFILE = 'E:\\example.csv';
+PATHCSVFILE = './data.csv';
 NOTFOUND = -1;
 
 LAKE = 'activity-71';

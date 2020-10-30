@@ -9,6 +9,9 @@ import csv
 import constants
 import ClassRobotParser
 from urllib import parse
+import datetime
+import sys
+
 
 myScrapper:ClassScrapper.Scrapper = None;
 myDictData:dict = dict();
@@ -24,7 +27,7 @@ Desc:
         El value de cada key serà un altre Dictionary que contindrà les dades
         obtingudes desprès de fer Scrapping sobre una pàgina .html. Aquest
         Dictionary tindrà 23 keys amb els seus valors.
-    Per saber l'idioma en el que tenim que escriure les headers en aquest fitxer
+    Per saber l'idioma en el que hem d'escriure les headers en aquest fitxer
     hem avaluar la key 12 d' aquest Dictionary que en:
         Anglès té el value [Rated]
         Castellà té el value [Valoración]
@@ -60,7 +63,7 @@ def writeCSV(paramDataUrls:dict):
                           constants.FIELD17,constants.FIELD18,constants.FIELD19,constants.FIELD20,
                           constants.FIELD21,constants.FIELD22,constants.FIELD23];
         
-        with open(constants.PATHCSVFILE, 'a') as csvfile:
+        with open(constants.PATHCSVFILE, 'a', newline='') as csvfile:
             
             writer = csv.DictWriter(csvfile, fieldnames=fieldNames);
             
@@ -77,8 +80,40 @@ def writeCSV(paramDataUrls:dict):
     
 
 if __name__ == '__main__':
-
+    
+    
     try:
+        #S'inicialitza i s'obra el log
+        initDate:datetime;
+        elapsed:float;
+        #Canviar nom a scrapper.log ??
+        fileLog = fileLog = open('main.log','a');
+        initDate = datetime.datetime.now()
+        fileLog.write(str(datetime.datetime.now()) + ' ======== Start The Web Scrapping =========\n')
+         
+        
+        '''
+        #Llegim els arguments
+        activitat=sys.argv[1]
+        pais=sys.argv[2]
+        regio1=sys.argv[3]
+        regio2=sys.argv[4]
+        '''
+        #ToDo: Adaptar! Paràmetres per a testejar
+        activitat='outdoor'
+        pais='andorra'
+        regio1='canillo'
+        regio2='canillo'
+        
+        #Es normalitzen els arguments afegint la / per a accedir a la url
+        if (pais != ''):
+            pais = '/'+pais
+        if (regio1 != ''):
+            regio1 = '/'+regio1   
+        if (regio2 != ''):
+            regio2 = '/'+regio2
+           
+            
         #myScrapper = ClassScrapper.Scrapper('E:\\UOC\\Subjects\\Tipologia_Dades\\PRACTICA\\PRACT1\\WikilocTest.html');
         #myScrapper = ClassScrapper.Scrapper('X:\\WikilocTest.html');
         
@@ -88,78 +123,23 @@ if __name__ == '__main__':
         myRobotParser = ClassRobotParser.RobotParser(parse.urljoin(constants.MAIN_URL,constants.ROBOTS_FILE));
         #Creem un obj. de tipus [Protego]
         myRobotParser.create();
-        
-        #Validem si l' Url està permessa dins del site o no
-        allowUrl = myRobotParser.is_allowed('https://ca.wikiloc.com/rutes-alpinisme/170722-100-cims-andorra-no-192-pic-de-la-serrera-des-dels-plans-de-ransol-18773078');
-        if (allowUrl == False):
-            raise Exception ('Url: ' + constants.RUTAS_PAGE + ' is NOT allowed... \n');
-        
-        #Arranquem l'acció per executar el Web Scrapping
-        myScrapper.start('https://ca.wikiloc.com/rutes-alpinisme/170722-100-cims-andorra-no-192-pic-de-la-serrera-des-dels-plans-de-ransol-18773078');
-        
-        myScrapper.getTypeTrack();
-        myScrapper.getTrailRank();
-        myScrapper.getUserRank();
-        myScrapper.getDataTrack();
-        myScrapper.getDateCreation();
-        
-        #Tant els vots com les senyals del diferents punts de la ruta
-        #són opcionals i per això hem de controlar la possibilitat
-        #de que no hi siguin
-        try:
-            p = myScrapper.getVotes();
-        except Exception as e:
-            print(e);
-        
-        try:
-            myScrapper.getCards();
-        except Exception as e:
-            print(e);
+    
+    
+        data = myScrapper.scrape(activitat, pais, regio1, regio2, fileLog)
+        fileLog.write('Rutes trobades = '+str(len(data))+'\n')
+        print('Rutes trobades = '+str(len(data)))
+        writeCSV(data)
             
-        print(myScrapper.data);
-        
-        for x in range(5):
-            myDictData["url" + str(x)] = myScrapper.data;
-            
-        myScrapper.stop();
-        
-        
-        #Arranquem l'acció per executar el Web Scrapping
-        myScrapper.start('https://ca.wikiloc.com/rutes-alpinisme/160727-2x100-cims-andorra-pic-negre-denvalira-no-169-i-montmalus-no-170-des-de-grau-roig-14170224');
-        
-        p = myScrapper.getTypeTrack();
-        p = myScrapper.getTrailRank();
-        p = myScrapper.getUserRank();
-        myScrapper.getDataTrack();
-        p = myScrapper.getDateCreation();
-        
-        #Tant els vots com les senyals del diferents punts de la ruta
-        #són opcionals i per això hem de controlar la possibilitat
-        #de que no hi siguin
-        try:
-            p = myScrapper.getVotes();
-        except Exception as e:
-            print(e);
-        
-        try:
-            myScrapper.getCards();
-        except Exception as e:
-            print(e);
-            
-        print(myScrapper.data);
-        
-        for x in range(5,10):
-            myDictData["url" + str(x)] = myScrapper.data;
-        
-        writeCSV(myDictData);
-            
-        
     except Exception as e:
         print(e);
     finally:
         del myScrapper;
         del myDictData;
         del myRobotParser;
+        elapsed = (datetime.datetime.now() - initDate).total_seconds();
+        fileLog.write(str(datetime.datetime.now()) + ' ======== Elapsed Time: ' + str(elapsed) + '=========\n');
+        fileLog.write(str(datetime.datetime.now()) + ' ======== End The Web Scrapping =========\n');
+        fileLog.close()
 
 
             

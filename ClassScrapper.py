@@ -6,6 +6,8 @@ Created on Mon Oct 26 08:31:52 2020
 """
 
 from bs4 import BeautifulSoup
+import ClassRobotParser
+from urllib import parse
 import constants
 import requests
 import random
@@ -49,7 +51,11 @@ class Scrapper(object):
         #Dictionary on guardarem totes les dades obtingudes de la url
         #seleccionada mitjançant Web Scrapping
         self.__data:dict = None;
-      
+        #Instancia de l'obj. [RobotParser]
+        self.myRobotParser = ClassRobotParser.RobotParser(parse.urljoin(constants.MAIN_URL,constants.ROBOTS_FILE));
+        #Creem un obj. de tipus [Protego]
+        self.myRobotParser.create();
+
     """
     Desc:
         Realitza una petició GET a una pàgina , valida si la connexió s'ha 
@@ -90,6 +96,173 @@ class Scrapper(object):
                 raise Exception('Network Status Code: ' + str(myResponse.status_code) + ' with the URL: ' + url)
         except Exception as e:
             raise Exception("Method download_page(): Error: {0}".format(e));
+     
+    
+    def __isAllowed(self, url, fileLog) -> bool:
+        allowUrl = self.myRobotParser.is_allowed(url);
+        if (allowUrl == False):
+            fileLog.write('DENIED URL: '+url+'\n');
+            raise Exception ('Url: ' + constants.RUTAS_PAGE + ' is NOT allowed... \n')
+        fileLog.write('ALLOWED URL: '+url+'\n');
+        return allowUrl
+          
+    """
+    Desc:
+        Realitza tota la feina de .
+    Params:
+        activitat: activitat introduïda per l'usuari
+        pais: pais introduït per l'ususuari
+        regio1: regio1 introduït per l'ususuari
+        regio2: regio2 introduït per l'ususuari
+        fileLog: fitxer log
+    Return: Vector de diccionnaris amb totes les dades scrapejades.
+    """        
+    def scrape(self, activitat:str, pais:str, regio1:str, regio2:str, fileLog):
+        url_rutes = self.get_urls(activitat, pais, regio1, regio2, fileLog)
+        data = dict()
+        for idx, ruta in enumerate(url_rutes):
+            #print(ruta)
+            #Validem si l' Url està permessa dins del site o no
+            if self.__isAllowed(ruta, fileLog):
+                self.start_ruta(ruta)
+                self.getTypeTrack();
+                self.getTrailRank();
+                self.getUserRank();
+                self.getDataTrack();
+                self.getDateCreation();
+                #Tant els vots com les senyals del diferents punts de la ruta
+                #són opcionals i per això hem de controlar la possibilitat
+                #de que no hi siguin
+                try:
+                    self.getVotes();
+                except Exception as e:
+                    fileLog.write('La url: '+ruta+' no té vots\n');
+                    #print(e);
+                try:
+                    self.getCards();
+                except Exception as e:
+                    fileLog.write('La url: '+ruta+' no té informació addicional\n');
+                    #print(e);
+                data["url" + str(idx)] = self.data;
+                
+        self.stop();
+        return data
+        
+    """
+    Desc:
+        Recorre totes les pàgines de les rutes filtrades per activitat, país, 
+        regio1 i regio2.
+    Params:
+        activitat: activitat introduïda per l'usuari
+        pais: pais introduït per l'ususuari
+        regio1: regio1 introduït per l'ususuari
+        regio2: regio2 introduït per l'ususuari
+        fileLog: fitxer log
+    Return: Vector que conté les adreces url.
+    """
+    def get_urls(self, activitat:str, pais:str, regio1:str, regio2:str, fileLog):
+         #Rutes regio2
+        if (regio2 != ''):
+            url_base = 'https://ca.wikiloc.com/rutes/'+activitat+pais+regio1+regio2
+            #Modificar a buscar_url_valorades()
+            return self.__buscar_urls_valorades(url_base, fileLog) 
+        #Rutes regio1
+        if (regio1 != ''):
+            url_base = 'https://ca.wikiloc.com/rutes/'+activitat+pais+regio1
+            urls_regio2 = self.__get_urls_filter(url_base, activitat, fileLog)
+            url_rutes_regio1 = []
+            for url in urls_regio2:
+                #Modificar a buscar_url_valorades()
+                url_rutes_regio1 = url_rutes_regio1 + self.__buscar_urls_valorades(url, fileLog)
+            return url_rutes_regio1
+        #Rutes pais
+        if (pais != ''):
+            url_base = 'https://ca.wikiloc.com/rutes/'+activitat+pais
+            urls_filter_pais = self.__get_urls_filter(url_base, activitat, fileLog)
+            url_rutes_pais = []
+            for url_regio1 in urls_filter_pais:
+                urls_regio2 = self.__get_urls_filter(url_regio1, activitat, fileLog)
+                for url_regio2 in urls_regio2:
+                    url_rutes_pais = url_rutes_pais + self.__buscar_urls_valorades(url_regio2, fileLog)
+            return url_rutes_pais  
+        return self.__buscar_urls_valorades('https://ca.wikiloc.com/rutes/'+activitat) 
+    
+    """
+    Desc:
+        Mètode que recorre les urls amb id="filters" que pertanyen a url_base.
+    Params:
+        url_base: adreça url de la pàgina a tractar
+        activitat: activitat introduïda per l'usuari
+        fileLog: fitxer log.
+    Return: 
+        Vector amb les adreces url trobades.
+    """
+    def __get_urls_filter(self, url_base, activitat, fileLog):
+        urls_filter = []
+        try:
+            #page = requests.get(url_base, headers=headers)
+            #soup = BeautifulSoup(page.content, features="lxml")
+            if self.__isAllowed(url_base, fileLog):
+                htmlDom = self.__download_page(url_base);
+                soup = BeautifulSoup(htmlDom,'html.parser');
+                if (soup.find(id="filters") == None):
+                    #ToDo: Preguntar Xavier si hauria de fer d'escriure al log o no cal
+                    fileLog.write('Soup Error: There arent filter links for '+url_base+'\n');
+                    raise Exception('Soup Error: There arent filter links for ' + url_base);
+                ul = soup.find(id="filters").find('ul')
+                for link in ul.find_all('a'):
+                    #Substituim 'outdoor' per l'activitat per accedir a la ruta correcta
+                    url = str.replace(link.get('href'), 'outdoor', activitat)
+                    urls_filter.append(url)
+                    #fileLog.write('FILTER ----> '+url+'\n')
+                    #print(url)
+        except Exception as e:
+            raise e;
+        else:
+            return urls_filter  
+    
+    """
+    Desc:
+        Es recorre totes les pàgines de l'adreça "url_principal" i es retorna
+        totes les adreces urls de les rutes valorades que s'hi troben.
+    Params:
+        url_principal: adreça url de la pàgina a tractar
+        fileLog: fitxer log.
+    Return:
+        
+    """
+    def __buscar_urls_valorades(self, url_principal, fileLog):
+        next = ''
+        actual_page = ''
+        url_rutes_regio2 = []
+        #Iterem disposem de pàgines.
+        while next != None: 
+            url_actual = url_principal + actual_page
+            if self.__isAllowed(url_actual, fileLog):
+                try:
+                    #print(url_actual)
+                    #fileLog.write('PAGE -> '+url_actual+'\n')
+                    #page = requests.get(url_actual, headers=headers)
+                    #soup = BeautifulSoup(page.content, features="lxml")
+                    htmlDom = self.__download_page(url_actual);
+                    soup = BeautifulSoup(htmlDom,'html.parser');
+                    if (soup.find(id="trails") == None):
+                        #ToDo: Preguntar Xavier si hauria de fer d'escriure al log o no cal
+                        fileLog.write('Soup Error: There arent trail links for '+url_actual+'\n');
+                        raise Exception('Soup Error: There arent trail links for ' + url_actual); 
+                except Exception as e:
+                    raise e;
+                else:
+                    for row in soup.find(id="trails").find_all_next('div', 'row'):
+                        #print(row.find('a', 'rating-container')) #Test
+                        if row.find('a', 'rating-container') != None:
+                            url_rutes_regio2.append(row.find('a', 'trail-title').get('href'))        
+                    next = soup.find('a', 'next')
+                    if next != None:
+                        actual_page = next.get('href')     
+        fileLog.write('Num rutes valorades a '+url_principal+' -> '+str(len(url_rutes_regio2))+'\n')
+        return url_rutes_regio2
+        
         
     """
     Desc: 
@@ -100,7 +273,7 @@ class Scrapper(object):
     Params:
         paramUrl: adreça url de la pàgina a tractar
     """
-    def start(self, paramUrl):
+    def start_ruta(self, paramUrl):
         self.__data:dict = dict();
         htmlDom:str = None;
         
