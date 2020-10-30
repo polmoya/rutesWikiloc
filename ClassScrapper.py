@@ -8,6 +8,8 @@ Created on Mon Oct 26 08:31:52 2020
 from bs4 import BeautifulSoup
 import constants
 import requests
+import random
+
 
 class Scrapper(object):
     
@@ -59,10 +61,28 @@ class Scrapper(object):
         Un string que conté el txt de la p+agina visitada
     """
     def __download_page(self,url:str) -> str:
-        myResponse:requests.Response=None;
-        #header ={'User-Agent': 'Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0 '};
-        myHeader={'User-Agent':'Mozilla/5.0 (SMART-TV; X11; Linux armv71) AppleWebKit/537.42 (KHTML, like Gecko) Chromium/25.0.1349.2 Chrome/25.0.1349.2 Safari/537.42'};
+        myResponse:requests.Response=None;        
+        user_agent_list = [
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+            'Mozilla/5.0 (SMART-TV; X11; Linux armv71) AppleWebKit/537.42 (KHTML, like Gecko) Chromium/25.0.1349.2 Chrome/25.0.1349.2 Safari/537.42',
+            #'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
+        ]
         try:
+            #Funció que ens escull un user_agent aleatòri
+            user_agent = random.choice(user_agent_list)
+            #headers que ens ajuden a simular que l'accés el fa una persona normal i evitem els anti web scraping.
+            myHeader = {"User-Agent":user_agent,
+               #"Accept-Language":"ca",
+               "Accept-Encoding":"gzip, deflate", 
+               "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", 
+               "DNT":"1","Connection":"close", "Upgrade-Insecure-Requests":"1",
+               "Referer": "http://www.google.com/"}
+           
+            
             myResponse = requests.get(url,headers = myHeader);
             if myResponse.status_code == 200:
                 return myResponse.text;
