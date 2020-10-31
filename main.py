@@ -1,167 +1,146 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Oct 14 20:40:16 2020
+Created on Mon Oct 26 08:56:59 2020
 
-@author: moyap
+@author: Xavier & Pol
 """
-
+import ClassScrapper
+import csv
+import constants
+import ClassRobotParser
+from urllib import parse
 import datetime
-import requests
-from bs4 import BeautifulSoup
-import random
 import sys
-#Variables globals:
-#Agent lists per simular que s'accedeix a la url des d'un navegador normal
-user_agent_list = [
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
-        #'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
-    ]
-
-#Funció que ens escull un user_agent aleatòri
-user_agent = random.choice(user_agent_list)
-#headers que ens ajuden a simular que l'accés el fa una persona normal i evitem els anti web scraping.
-headers = {"User-Agent":user_agent,
-           "Accept-Language":"ca",
-           "Accept-Encoding":"gzip, deflate", 
-           "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", 
-           "DNT":"1","Connection":"close", "Upgrade-Insecure-Requests":"1",
-           "Referer": "http://www.google.com/"}
-
-initDate:datetime;
-elapsed:float;
-fileLog = fileLog = open('main.log','a');
 
 
-def main():
-   #S'inicialitza el log
+myScrapper:ClassScrapper.Scrapper = None;
+myDictData:dict = dict();
+myRobotParser:ClassRobotParser.RobotParser = None;
+allowUrl:bool = False;
+
+
+"""
+Desc:
+    Escriu en un fitxer de tipus .csv tots els elements d' un Dictionary.
+    Estructura del Dictionary:
+        Les keys tindran el format url####, on #### pot ser un nombre >= 0
+        El value de cada key serà un altre Dictionary que contindrà les dades
+        obtingudes desprès de fer Scrapping sobre una pàgina .html. Aquest
+        Dictionary tindrà 23 keys amb els seus valors.
+    Per saber l'idioma en el que hem d'escriure les headers en aquest fitxer
+    hem avaluar la key 12 d' aquest Dictionary que en:
+        Anglès té el value [Rated]
+        Castellà té el value [Valoración]
+        Català té el value [Valoració]
+Params:
+    paramDataUrls: dictionary que conté les dades obtingudes desprès de fer
+    el Web Scrapping sobre la pàgina.
+"""
+def writeCSV(paramDataUrls:dict):
+    fieldNames:list = None;
+    
     try:
+        #Segons l'idioma els headers seran uns o uns altres
+        if (constants.FIELD12_ENG in paramDataUrls["url0"]):
+            fieldNames = [constants.FIELD1,constants.FIELD2,constants.FIELD3,constants.FIELD4_ENG,
+                          constants.FIELD5,constants.FIELD6_ENG,constants.FIELD7_ENG,constants.FIELD8_ENG,
+                          constants.FIELD9_ENG,constants.FIELD10_ENG,constants.FIELD11_ENG,constants.FIELD12_ENG,
+                          constants.FIELD13_ENG,constants.FIELD14,constants.FIELD15,constants.FIELD16,
+                          constants.FIELD17,constants.FIELD18,constants.FIELD19,constants.FIELD20,
+                          constants.FIELD21,constants.FIELD22,constants.FIELD23];
+        elif (constants.FIELD12 in paramDataUrls["url0"]):
+            fieldNames = [constants.FIELD1,constants.FIELD2,constants.FIELD3,constants.FIELD4,
+                          constants.FIELD5,constants.FIELD6,constants.FIELD7,constants.FIELD8,
+                          constants.FIELD9,constants.FIELD10,constants.FIELD11,constants.FIELD12,
+                          constants.FIELD13,constants.FIELD14,constants.FIELD15,constants.FIELD16,
+                          constants.FIELD17,constants.FIELD18,constants.FIELD19,constants.FIELD20,
+                          constants.FIELD21,constants.FIELD22,constants.FIELD23];
+        else:
+            fieldNames = [constants.FIELD1,constants.FIELD2,constants.FIELD3,constants.FIELD4_CAT,
+                          constants.FIELD5,constants.FIELD6_CAT,constants.FIELD7_CAT,constants.FIELD8_CAT,
+                          constants.FIELD9_CAT,constants.FIELD10_CAT,constants.FIELD11_CAT,constants.FIELD12_CAT,
+                          constants.FIELD13_CAT,constants.FIELD14,constants.FIELD15,constants.FIELD16,
+                          constants.FIELD17,constants.FIELD18,constants.FIELD19,constants.FIELD20,
+                          constants.FIELD21,constants.FIELD22,constants.FIELD23];
+        
+        #ToDo: Canviar path file al nom del CSV, ha de ser representatiu
+        with open(constants.PATHCSVFILE, 'a', newline='') as csvfile:
+            
+            writer = csv.DictWriter(csvfile, fieldnames=fieldNames);
+            
+            writer.writeheader();
+            
+            for x in range(len(paramDataUrls)):
+                writer.writerow(paramDataUrls["url" + str(x)]);
+            
+    except Exception as e:
+        raise Exception("Method writeCSV(): Error: {0}".format(e));
+    finally:        
+        if (fieldNames != None):
+            del fieldNames;
+    
+
+if __name__ == '__main__':
+    
+    
+    try:
+        #S'inicialitza i s'obra el log
+        initDate:datetime;
+        elapsed:float;
+        #Canviar nom a scrapper.log ??
+        fileLog = fileLog = open('main.log','a');
         initDate = datetime.datetime.now()
         fileLog.write(str(datetime.datetime.now()) + ' ======== Start The Web Scrapping =========\n')
-    except Exception as e:
-        raise e;  
-  
-    '''
-    #Llegim els arguments
-    activitat=sys.argv[1]
-    pais=sys.argv[2]
-    regio1=sys.argv[3]
-    regio2=sys.argv[4]
-    '''
-    #ToDo: Adaptar! Paràmetres per a testejar
-    activitat='sender-accessible'
-    pais=''
-    regio1=''
-    regio2=''
-    
-    #Es normalitzen els arguments afegint la / per a accedir a la url
-    if (pais != ''):
-        pais = '/'+pais
-    if (regio1 != ''):
-        regio1 = '/'+regio1   
-    if (regio2 != ''):
-        regio2 = '/'+regio2  
-   
-    url_rutes_get = get_urls(activitat, pais, regio1, regio2)
-    
-    try:
-        fileLog.write('urls_rutes_valorades -> ' + str(url_rutes_get) +'\n')
-        fileLog.write('Length urls_rutes_valorades -> ' + str(len(url_rutes_get))+'\n')
-    except Exception as e:
-        raise e;
+         
         
-    try:
+        '''
+        #Llegim els arguments
+        activitat=sys.argv[1]
+        pais=sys.argv[2]
+        regio1=sys.argv[3]
+        regio2=sys.argv[4]
+        '''
+        #ToDo: Adaptar! Paràmetres per a testejar
+        activitat='outdoor'
+        pais='andorra'
+        regio1='canillo'
+        regio2='canillo'
+        
+        #Es normalitzen els arguments afegint la / per a accedir a la url
+        if (pais != ''):
+            pais = '/'+pais
+        if (regio1 != ''):
+            regio1 = '/'+regio1   
+        if (regio2 != ''):
+            regio2 = '/'+regio2
+           
+            
+        #myScrapper = ClassScrapper.Scrapper('E:\\UOC\\Subjects\\Tipologia_Dades\\PRACTICA\\PRACT1\\WikilocTest.html');
+        #myScrapper = ClassScrapper.Scrapper('X:\\WikilocTest.html');
+        
+        #Obtenim una instancia del obj. [Scrapper]
+        myScrapper = ClassScrapper.Scrapper();
+        #Instancia de l'obj. [RobotParser]
+        myRobotParser = ClassRobotParser.RobotParser(parse.urljoin(constants.MAIN_URL,constants.ROBOTS_FILE));
+        #Creem un obj. de tipus [Protego]
+        myRobotParser.create();
+    
+    
+        data = myScrapper.scrape(activitat, pais, regio1, regio2, fileLog)
+        fileLog.write('Rutes trobades = '+str(len(data))+'\n')
+        print('Rutes trobades = '+str(len(data)))
+        writeCSV(data)
+            
+    except Exception as e:
+        print(e);
+    finally:
+        del myScrapper;
+        del myDictData;
+        del myRobotParser;
         elapsed = (datetime.datetime.now() - initDate).total_seconds();
         fileLog.write(str(datetime.datetime.now()) + ' ======== Elapsed Time: ' + str(elapsed) + '=========\n');
         fileLog.write(str(datetime.datetime.now()) + ' ======== End The Web Scrapping =========\n');
         fileLog.close()
-    except Exception as e:
-        raise e;
 
-#Mètode que retorna les urls amb id="filters" que pertanyen a una regió.
-def get_urls_filter(url_base, activitat):
-    try:
-        page = requests.get(url_base, headers=headers)
-        soup = BeautifulSoup(page.content, features="lxml")
-        if (soup.find(id="filters") == None):
-            #ToDo: Preguntar Xavier si hauria de fer d'escriure al log o no cal
-            fileLog.write('Soup Error: There arent filter links for '+url_base+'\n');
-            raise Exception('Soup Error: There arent filter links for ' + url_base);
-        ul = soup.find(id="filters").find('ul')
-        urls_filter = []
-        for link in ul.find_all('a'):
-            #Substituim 'outdoor' per l'activitat per accedir a la ruta correcta
-            url = str.replace(link.get('href'), 'outdoor', activitat)
-            urls_filter.append(url)
-            fileLog.write('FILTER ----> '+url+'\n')
-            #print(url)
-    except Exception as e:
-        raise e;
-    else:
-        return urls_filter    
-    
 
-#Mètode que retorna totes les urls de les rutes filtrades per activitat, país, regio1 i regio2.
-def get_urls(activitat, pais, regio1, regio2):
-     #Rutes regio2
-    if (regio2 != ''):
-        url_base = 'https://ca.wikiloc.com/rutes/'+activitat+pais+regio1+regio2
-        #Modificar a buscar_url_valorades()
-        return buscar_urls_valorades(url_base) 
-    #Rutes regio1
-    if (regio1 != ''):
-        url_base = 'https://ca.wikiloc.com/rutes/'+activitat+pais+regio1
-        urls_regio2 = get_urls_filter(url_base, activitat)
-        url_rutes_regio1 = []
-        for url in urls_regio2:
-            #Modificar a buscar_url_valorades()
-            url_rutes_regio1 = url_rutes_regio1 + buscar_urls_valorades(url)
-        return url_rutes_regio1
-    #Rutes pais
-    if (pais != ''):
-        url_base = 'https://ca.wikiloc.com/rutes/'+activitat+pais
-        urls_filter_pais = get_urls_filter(url_base, activitat)
-        url_rutes_pais = []
-        for url_regio1 in urls_filter_pais:
-            urls_regio2 = get_urls_filter(url_regio1, activitat)
-            for url_regio2 in urls_regio2:
-                url_rutes_pais = url_rutes_pais + buscar_urls_valorades(url_regio2)
-        return url_rutes_pais  
-    return buscar_urls_valorades('https://ca.wikiloc.com/rutes/'+activitat)  
- 
-#Mètode que recorre totes les pàgines de la url_principal i retorna les url de les rutes valorades.    
-def buscar_urls_valorades(url_principal):
-    next = ''
-    actual_page = ''
-    url_rutes_regio2 = []
-    #Iterem disposem de pàgines.
-    while next != None: 
-        url_actual = url_principal + actual_page
-        try:
-            fileLog.write('PAGE -> '+url_actual+'\n')
-            page = requests.get(url_actual, headers=headers)
-            soup = BeautifulSoup(page.content, features="lxml")
-            if (soup.find(id="trails") == None):
-                #ToDo: Preguntar Xavier si hauria de fer d'escriure al log o no cal
-                fileLog.write('Soup Error: There arent trail links for '+url_actual+'\n');
-                raise Exception('Soup Error: There arent trail links for ' + url_actual); 
-        except Exception as e:
-            raise e;
-        else:
-            for row in soup.find(id="trails").find_all_next('div', 'row'):
-                #print(row.find('a', 'rating-container')) #Test
-                if row.find('a', 'rating-container') != None:
-                    url_rutes_regio2.append(row.find('a', 'trail-title').get('href'))        
-            next = soup.find('a', 'next')
-            if next != None:
-                actual_page = next.get('href')
             
-    fileLog.write('Num rutes valorades a '+url_principal+' -> '+str(len(url_rutes_regio2))+'\n')
-    return url_rutes_regio2
-    
-
-     
-main()
