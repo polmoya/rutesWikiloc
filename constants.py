@@ -2,7 +2,7 @@
 """
 Created on Thu Oct 15 18:29:19 2020
 
-@author: XMB1483
+@author: Xavier & Pol
 """
 
 LOG_FILE = 'MainWebScrapping.log';

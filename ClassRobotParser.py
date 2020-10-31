@@ -2,7 +2,7 @@
 """
 Created on Sun Oct 25 21:45:53 2020
 
-@author: XMB1483
+@author: Xavier & Pol
 """
 from protego import Protego
 

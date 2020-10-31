@@ -2,7 +2,7 @@
 """
 Created on Mon Oct 26 08:31:52 2020
 
-@author: XMB1483
+@author: Xavier & Pol
 """
 
 from bs4 import BeautifulSoup
