@@ -36,7 +36,7 @@ Params:
     paramDataUrls: dictionary que conté les dades obtingudes desprès de fer
     el Web Scrapping sobre la pàgina.
 """
-def writeCSV(paramDataUrls:dict):
+def writeCSV(paramDataUrls:dict, pathcsvfile):
     fieldNames:list = None;
     
     try:
@@ -64,7 +64,7 @@ def writeCSV(paramDataUrls:dict):
                           constants.FIELD21,constants.FIELD22,constants.FIELD23];
         
         #ToDo: Canviar path file al nom del CSV, ha de ser representatiu
-        with open(constants.PATHCSVFILE, 'a', newline='') as csvfile:
+        with open(pathcsvfile, 'a', newline='') as csvfile:
             
             writer = csv.DictWriter(csvfile, fieldnames=fieldNames);
             
@@ -106,14 +106,22 @@ if __name__ == '__main__':
         regio1='canillo'
         regio2='canillo'
         
+        #Es crea el nom del dataframe
+        pathcsvfile = './rutes_'+activitat
         #Es normalitzen els arguments afegint la / per a accedir a la url
+        if (activitat == ''):
+            activitat = 'outdoor'
         if (pais != ''):
+            pathcsvfile += '_'+pais
             pais = '/'+pais
         if (regio1 != ''):
-            regio1 = '/'+regio1   
+            pathcsvfile += '_'+regio1
+            regio1 = '/'+regio1  
         if (regio2 != ''):
+            pathcsvfile += '_'+regio2
             regio2 = '/'+regio2
-           
+        pathcsvfile += '.csv'
+        print(pathcsvfile)  
             
         #myScrapper = ClassScrapper.Scrapper('E:\\UOC\\Subjects\\Tipologia_Dades\\PRACTICA\\PRACT1\\WikilocTest.html');
         #myScrapper = ClassScrapper.Scrapper('X:\\WikilocTest.html');
@@ -129,7 +137,7 @@ if __name__ == '__main__':
         data = myScrapper.scrape(activitat, pais, regio1, regio2, fileLog)
         fileLog.write('Rutes trobades = '+str(len(data))+'\n')
         print('Rutes trobades = '+str(len(data)))
-        writeCSV(data)
+        writeCSV(data, pathcsvfile)
             
     except Exception as e:
         print(e);
