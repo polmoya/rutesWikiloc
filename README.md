@@ -94,7 +94,7 @@ Arguments que es poden introduïr:
 *  regio1: Igual que succeeix amb els països, no es poden introduïr totes les regions1, per a introduïr la regio1 si no la coneixem, podem navegar a https://ca.wikiloc.com/rutes/outdoor/{nomPais} i es poden visualitzar a la dreta (com podem comprovar en la imatge) les diferents regions. Si accedim a una d'elles podem visualitzar el nom de la regio en la la url. Seria: https://ca.wikiloc.com/rutes/outdoor/{nomPais}/{regio1}
 
 <p align="center">
-<img src="./img/regions.png" width="90%">
+<img src="./img/regions.PNG" width="90%">
 </p>
 
 * regio2: Seria exactament igual que la regio1 però en el següent nivell de profunditat, per tant:  https://ca.wikiloc.com/rutes/outdoor/{nomPais}/{regio1}/{regio2}
