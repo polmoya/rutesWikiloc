@@ -102,8 +102,8 @@ class Scrapper(object):
         allowUrl = self.myRobotParser.is_allowed(url);
         if (allowUrl == False):
             fileLog.write('DENIED URL: '+url+'\n');
-            raise Exception ('Url: ' + constants.RUTAS_PAGE + ' is NOT allowed... \n')
         fileLog.write('ALLOWED URL: '+url+'\n');
+        fileLog.flush()
         return allowUrl
           
     """
@@ -129,22 +129,26 @@ class Scrapper(object):
                 self.getTrailRank();
                 self.getUserRank();
                 self.getDataTrack();
-                self.getDateCreation();
-                #Tant els vots com les senyals del diferents punts de la ruta
+                #Tant les dades de creació, els vots com les senyals del diferents punts de la ruta
                 #són opcionals i per això hem de controlar la possibilitat
                 #de que no hi siguin
+                try:
+                    self.getDateCreation();
+                except Exception as e:
+                    fileLog.write('La url: '+ruta+' no té data de creació\n')
+                    fileLog.write(str(e)+'\n')
                 try:
                     self.getVotes();
                 except Exception as e:
                     fileLog.write('La url: '+ruta+' no té vots\n');
-                    #print(e);
+                    fileLog.write(str(e)+'\n')
                 try:
                     self.getCards();
                 except Exception as e:
                     fileLog.write('La url: '+ruta+' no té informació addicional\n');
-                    #print(e);
+                    fileLog.write(str(e)+'\n')
                 data["url" + str(idx)] = self.data;
-                
+        fileLog.flush()
         self.stop();
         return data
         
@@ -162,12 +166,12 @@ class Scrapper(object):
     """
     def get_urls(self, activitat:str, pais:str, regio1:str, regio2:str, fileLog):
          #Rutes regio2
-        if (regio2 != ''):
+        if (regio2 != '-1'):
             url_base = 'https://ca.wikiloc.com/rutes/'+activitat+pais+regio1+regio2
             #Modificar a buscar_url_valorades()
             return self.__buscar_urls_valorades(url_base, fileLog) 
         #Rutes regio1
-        if (regio1 != ''):
+        if (regio1 != '-1'):
             url_base = 'https://ca.wikiloc.com/rutes/'+activitat+pais+regio1
             urls_regio2 = self.__get_urls_filter(url_base, activitat, fileLog)
             url_rutes_regio1 = []
@@ -176,7 +180,7 @@ class Scrapper(object):
                 url_rutes_regio1 = url_rutes_regio1 + self.__buscar_urls_valorades(url, fileLog)
             return url_rutes_regio1
         #Rutes pais
-        if (pais != ''):
+        if (pais != '-1'):
             url_base = 'https://ca.wikiloc.com/rutes/'+activitat+pais
             urls_filter_pais = self.__get_urls_filter(url_base, activitat, fileLog)
             url_rutes_pais = []
@@ -199,27 +203,26 @@ class Scrapper(object):
     """
     def __get_urls_filter(self, url_base, activitat, fileLog):
         urls_filter = []
-        try:
-            #page = requests.get(url_base, headers=headers)
-            #soup = BeautifulSoup(page.content, features="lxml")
-            if self.__isAllowed(url_base, fileLog):
+        if self.__isAllowed(url_base, fileLog):
+            try:
+                #Descarreguem la pàgina url_actual
                 htmlDom = self.__download_page(url_base);
                 soup = BeautifulSoup(htmlDom,'html.parser');
                 if (soup.find(id="filters") == None):
-                    #ToDo: Preguntar Xavier si hauria de fer d'escriure al log o no cal
-                    fileLog.write('Soup Error: There arent filter links for '+url_base+'\n');
                     raise Exception('Soup Error: There arent filter links for ' + url_base);
                 ul = soup.find(id="filters").find('ul')
+                #Recorrem totes les regions
                 for link in ul.find_all('a'):
                     #Substituim 'outdoor' per l'activitat per accedir a la ruta correcta
                     url = str.replace(link.get('href'), 'outdoor', activitat)
                     urls_filter.append(url)
-                    #fileLog.write('FILTER ----> '+url+'\n')
-                    #print(url)
-        except Exception as e:
-            raise e;
-        else:
-            return urls_filter  
+                    fileLog.write('FILTER ----> '+url+'\n')
+            except Exception as e:
+                fileLog.write(str(e)+'\n')
+            else:
+                return urls_filter
+        fileLog.flush()
+        return urls_filter
     
     """
     Desc:
@@ -235,32 +238,32 @@ class Scrapper(object):
         next = ''
         actual_page = ''
         url_rutes_regio2 = []
-        #Iterem disposem de pàgines.
+        #Iterem mentre disposem de pàgines.
         while next != None: 
             url_actual = url_principal + actual_page
             if self.__isAllowed(url_actual, fileLog):
                 try:
-                    #print(url_actual)
-                    #fileLog.write('PAGE -> '+url_actual+'\n')
-                    #page = requests.get(url_actual, headers=headers)
-                    #soup = BeautifulSoup(page.content, features="lxml")
+                    #Descarreguem la pàgina url_actual
                     htmlDom = self.__download_page(url_actual);
                     soup = BeautifulSoup(htmlDom,'html.parser');
                     if (soup.find(id="trails") == None):
-                        #ToDo: Preguntar Xavier si hauria de fer d'escriure al log o no cal
-                        fileLog.write('Soup Error: There arent trail links for '+url_actual+'\n');
                         raise Exception('Soup Error: There arent trail links for ' + url_actual); 
                 except Exception as e:
-                    raise e;
+                    fileLog.write(str(e)+'\n')
+                    break
                 else:
+                    #Recorrem totes les rutes de la pàgina
                     for row in soup.find(id="trails").find_all_next('div', 'row'):
                         #print(row.find('a', 'rating-container')) #Test
                         if row.find('a', 'rating-container') != None:
                             url_rutes_regio2.append(row.find('a', 'trail-title').get('href'))        
                     next = soup.find('a', 'next')
                     if next != None:
-                        actual_page = next.get('href')     
+                        actual_page = next.get('href')
+            else:
+                break
         fileLog.write('Num rutes valorades a '+url_principal+' -> '+str(len(url_rutes_regio2))+'\n')
+        fileLog.flush()
         return url_rutes_regio2
         
         

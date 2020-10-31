@@ -90,41 +90,55 @@ if __name__ == '__main__':
         #Canviar nom a scrapper.log ??
         fileLog = fileLog = open('main.log','a');
         initDate = datetime.datetime.now()
-        fileLog.write(str(datetime.datetime.now()) + ' ======== Start The Web Scrapping =========\n')
-         
+        fileLog.write(str(datetime.datetime.now()) + ' ========= Start The Web Scrapping ==========\n')
         
-        '''
         #Llegim els arguments
         activitat=sys.argv[1]
         pais=sys.argv[2]
         regio1=sys.argv[3]
         regio2=sys.argv[4]
+        
         '''
-        #ToDo: Adaptar! Paràmetres per a testejar
+        #Paràmetres hardcoded per a testejar
         activitat='outdoor'
         pais='andorra'
         regio1='canillo'
         regio2='canillo'
+        '''
         
         #Es crea el nom del dataframe
-        pathcsvfile = './rutes_'+activitat
-        #Es normalitzen els arguments afegint la / per a accedir a la url
-        if (activitat == ''):
+        pathcsvfile = './rutes'
+        #Es normalitzen els arguments i el nom del dataframe
+        if (activitat == '-1'):
             activitat = 'outdoor'
-        if (pais != ''):
+            fileLog.write('Paràmetre activitat = '+activitat+' (totes)\n')
+        else:
+            fileLog.write('Paràmetre activitat = '+activitat+'\n')
+        pathcsvfile += '_'+activitat            
+        if (pais != '-1'):
+            fileLog.write('Paràmetre pais = '+pais+'\n')
             pathcsvfile += '_'+pais
             pais = '/'+pais
-        if (regio1 != ''):
+        else:
+            fileLog.write('Paràmetre pais = '+pais+' (tots)\n')
+        if (regio1 != '-1'):
             pathcsvfile += '_'+regio1
-            regio1 = '/'+regio1  
-        if (regio2 != ''):
+            fileLog.write('Paràmetre regio1 = '+regio1+'\n')
+            regio1 = '/'+regio1
+        else:
+            fileLog.write('Paràmetre regio1 = '+regio1+' (tots)\n')
+        if (regio2 != '-1'):
             pathcsvfile += '_'+regio2
+            fileLog.write('Paràmetre regio2 = '+regio2+'\n')
             regio2 = '/'+regio2
+        else:
+            fileLog.write('Paràmetre regio2 = '+regio2+' (tots)\n')
         pathcsvfile += '.csv'
-        print(pathcsvfile)  
-            
+        fileLog.flush()
+        
         #myScrapper = ClassScrapper.Scrapper('E:\\UOC\\Subjects\\Tipologia_Dades\\PRACTICA\\PRACT1\\WikilocTest.html');
         #myScrapper = ClassScrapper.Scrapper('X:\\WikilocTest.html');
+        
         
         #Obtenim una instancia del obj. [Scrapper]
         myScrapper = ClassScrapper.Scrapper();
@@ -136,6 +150,7 @@ if __name__ == '__main__':
     
         data = myScrapper.scrape(activitat, pais, regio1, regio2, fileLog)
         fileLog.write('Rutes trobades = '+str(len(data))+'\n')
+        fileLog.write('Ruta de les dades: '+pathcsvfile)
         print('Rutes trobades = '+str(len(data)))
         writeCSV(data, pathcsvfile)
             
@@ -146,8 +161,8 @@ if __name__ == '__main__':
         del myDictData;
         del myRobotParser;
         elapsed = (datetime.datetime.now() - initDate).total_seconds();
-        fileLog.write(str(datetime.datetime.now()) + ' ======== Elapsed Time: ' + str(elapsed) + '=========\n');
-        fileLog.write(str(datetime.datetime.now()) + ' ======== End The Web Scrapping =========\n');
+        fileLog.write(str(datetime.datetime.now()) + ' ========= Elapsed Time: ' + str(elapsed) + '==========\n');
+        fileLog.write(str(datetime.datetime.now()) + ' ========= End The Web Scrapping ==========\n');
         fileLog.close()
 
 
