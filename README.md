@@ -43,7 +43,7 @@ Arguments que es poden introduir:
     -  "raquetes-de-neu": Raquetes de Neu
     -  "esqui-de-fons": Esquí de fons
     -  "esqui": Esquí Alpí
-    -  "avio": Avio
+    -  "avio": Avió
     -  "a-cavall": Passeig a cavall
     -  "trineu-de-gossos-mushing": Trineu de gossos
     -  "escalada": Escalada
