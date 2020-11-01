@@ -3,7 +3,7 @@
 Aquesta pràctica s'ha realitzat en el context de l'assignatura *Tipologia i cicle de vida de les dades* que pertany al Màster en Ciència de Dades de la Universitat Oberta de Catalunya. En aquesta, s'apliquen tècniques de web scraping mitjançant el llenguatge de programació Python per tal d'extraure dades de la web https://ca.wikiloc.com/ i generar un dataset.
 
 ## Instalació
-Per a poder executar el programa, s'ha de tenir instal·lat Python3 i executar les comandes següents.
+Per a poder executar el programa, s'ha de tenir instal·lat Python3 i executar les comandes següents. Es pot instal·lar python a https://www.python.org/.
 
 ```python
 pip3 install requests
@@ -112,6 +112,7 @@ Arguments que es poden introduir:
 La pràctica s'ha realitzat per **Xavier Martin** i **Pol Moya Betriu**.
 
 ## Llicència
-Todo: Introduïr llicència.
+
+CC BY-SA 4.0 License
 
 
