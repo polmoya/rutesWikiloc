@@ -113,6 +113,6 @@ La pràctica s'ha realitzat per **Xavier Martin** i **Pol Moya Betriu**.
 
 ## Llicència
 
-CC BY-SA 4.0 License
+CC BY-NC-SA 4.0 License
 
 
