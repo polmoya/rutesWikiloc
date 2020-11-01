@@ -1,10 +1,15 @@
 # Pràctica 1: Web Scraping
 
-Aquesta pràctica s'ha realizat sota el context de l'assignatura *Tipologia i cicle de vida de les dades* que pertany al Màster en Ciència de Dades de la Universitat Oberta de Catalunya. En aquesta, s'apliquen tècniques de web scraping mitjançant el llenguatge de programació Python per tal d'extrarue dades de la web https://ca.wikiloc.com/ i generar un dataset.   
+Aquesta pràctica s'ha realitzat en el context de l'assignatura *Tipologia i cicle de vida de les dades* que pertany al Màster en Ciència de Dades de la Universitat Oberta de Catalunya. En aquesta, s'apliquen tècniques de web scraping mitjançant el llenguatge de programació Python per tal d'extraure dades de la web https://ca.wikiloc.com/ i generar un dataset.
 
 ## Instalació
+Per a poder executar el programa, s'ha de tenir instal·lat Python3 i executar les comandes següents.
+
 ```python
-#ToDo
+pip install requests
+pip install BeautifulSoup4
+pip install lxml
+pip install protego
 ```
 
 ## Ús
@@ -13,15 +18,15 @@ Aquesta pràctica s'ha realizat sota el context de l'assignatura *Tipologia i ci
 #Per a executar el programa s'ha d'introduïr la instrucció següent:
 python main.py {activitat} {pais} {regio1} {regio2}
 ```
-Arguments que es poden introduïr:  
+Arguments que es poden introduir:
 
 * activitat
     - "outdoor" / "-1": equival a totes les activitats
-    - "btt": Bicileta de muntanya
+    - "btt": Bicicleta de muntanya
     - "senderisme": Senderisme
     - "bicicleta-de-carretera": Bicicleta de carretera
-    - "correr": Còrrer
-    -  "cursa-de-muntanya": Cursa de muntanya / Còrrer per la muntanya
+    - "correr": Córrer
+    -  "cursa-de-muntanya": Cursa de muntanya / Córrer per la muntanya
     -  "alpinisme": Alpinisme
     -  "cicloturisme": Cicloturisme
     -  "a-peu": Passeig
@@ -89,16 +94,15 @@ Arguments que es poden introduïr:
     -  "joelette": Joëlette
     -  "amb-cotxet": Cotxet de bebè
     -  "splitboard": Splitboard
-    -  "gravel-bike": Bicicleta Gravel
-*  pais: No es definiran totes les opcions dels països perquè n'hi ha molts s'ha d'introduïr el nom del país en minuscules i si té més d'una paraula, s'ha de separar per guions. Es pot comprovar els paísos que hi ha a l'adreça: https://ca.wikiloc.com/rutes. Si es vol comprovar si s'ha introduït correctament el nom del país, es pot accedir a les rutes d'aquest país des d'un navegador i l'estructura que segueix és la següent: https://ca.wikiloc.com/rutes/outdoor/{nomPais}
-*  regio1: Igual que succeeix amb els països, no es poden introduïr totes les regions1, per a introduïr la regio1 si no la coneixem, podem navegar a https://ca.wikiloc.com/rutes/outdoor/{nomPais} i es poden visualitzar a la dreta (com podem comprovar en la imatge) les diferents regions. Si accedim a una d'elles podem visualitzar el nom de la regio en la la url. Seria: https://ca.wikiloc.com/rutes/outdoor/{nomPais}/{regio1}
+    -  "gravel-bike": Bicicleta gravel
+*  pais: No es definiran totes les opcions dels països perquè n'hi ha molts s'hi ha d'introduir el nom del país en minúscules i si té més d'una paraula, s'ha de separar per guions. Es pot comprovar els països que hi ha a l'adreça: https://ca.wikiloc.com/rutes. Si es vol comprovar si s'ha introduït correctament el nom del país, es pot accedir a les rutes d'aquest país des d'un navegador i l'estructura que segueix és la següent: `https://ca.wikiloc.com/rutes/outdoor/**{nomPais}**`.
+* regio1: Igual que succeeix amb els països, no es poden introduir totes les regions1, per a introduïr la regio1 si no la coneixem, podem navegar a `https://ca.wikiloc.com/rutes/outdoor/{nomPais}` i es poden visualitzar a la dreta (com podem comprovar en la imatge) les diferents regions. Si accedim a una d'elles podem visualitzar el nom de la regio en la url. Seria: `https://ca.wikiloc.com/rutes/outdoor/{nomPais}/**{regio1}**`.
 
 <p align="center">
 <img src="./img/regions.PNG" width="90%">
 </p>
 
-* regio2: Seria exactament igual que la regio1 però en el següent nivell de profunditat, per tant:  https://ca.wikiloc.com/rutes/outdoor/{nomPais}/{regio1}/{regio2}
-
+* regio2: Seria exactament igual que la regio1 però en el següent nivell de profunditat, per tant:  `https://ca.wikiloc.com/rutes/outdoor/{nomPais}/{regio1}/**{regio2}**`.
 ## Membres de l'equip
 
 La pràctica s'ha realitzat per **Xavier Martin** i **Pol Moya Betriu**.
