@@ -89,20 +89,20 @@ class Scrapper(object):
                "Referer": "http://www.google.com/"}
            
             
-            myResponse = requests.get(url,headers = myHeader);
+            myResponse = requests.get(url,headers = myHeader)
             if myResponse.status_code == 200:
-                return myResponse.text;
+                return myResponse.text
             else:
                 raise Exception('Network Status Code: ' + str(myResponse.status_code) + ' with the URL: ' + url)
         except Exception as e:
-            raise Exception("Method download_page(): Error: {0}".format(e));
+            raise Exception("Method download_page(): Error: {0}".format(e))
      
     
     def __isAllowed(self, url, fileLog) -> bool:
-        allowUrl = self.myRobotParser.is_allowed(url);
+        allowUrl = self.myRobotParser.is_allowed(url)
         if (allowUrl == False):
-            fileLog.write('DENIED URL: '+url+'\n');
-        fileLog.write('ALLOWED URL: '+url+'\n');
+            fileLog.write('DENIED URL: '+url+'\n')
+        fileLog.write('ALLOWED URL: '+url+'\n')
         fileLog.flush()
         return allowUrl
           
@@ -118,38 +118,49 @@ class Scrapper(object):
     Return: Vector de diccionnaris amb totes les dades scrapejades.
     """        
     def scrape(self, activitat:str, pais:str, regio1:str, regio2:str, fileLog):
-        url_rutes = self.get_urls(activitat, pais, regio1, regio2, fileLog)
-        data = dict()
-        for idx, ruta in enumerate(url_rutes):
-            #print(ruta)
-            #Validem si l' Url està permessa dins del site o no
-            if self.__isAllowed(ruta, fileLog):
-                self.start_ruta(ruta)
-                self.getTypeTrack();
-                self.getTrailRank();
-                self.getUserRank();
-                self.getDataTrack();
-                #Tant les dades de creació, els vots com les senyals del diferents punts de la ruta
-                #són opcionals i per això hem de controlar la possibilitat
-                #de que no hi siguin
-                try:
-                    self.getDateCreation();
-                except Exception as e:
-                    fileLog.write('La url: '+ruta+' no té data de creació\n')
-                    fileLog.write(str(e)+'\n')
-                try:
-                    self.getVotes();
-                except Exception as e:
-                    fileLog.write('La url: '+ruta+' no té vots\n');
-                    fileLog.write(str(e)+'\n')
-                try:
-                    self.getCards();
-                except Exception as e:
-                    fileLog.write('La url: '+ruta+' no té informació addicional\n');
-                    fileLog.write(str(e)+'\n')
-                data["url" + str(idx)] = self.data;
-        fileLog.flush()
-        self.stop();
+        try:
+            url_rutes = self.get_urls(activitat, pais, regio1, regio2, fileLog)
+            data = dict()
+            for idx, ruta in enumerate(url_rutes):
+                #print(ruta)
+                #Validem si l' Url està permessa dins del site o no
+                if self.__isAllowed(ruta, fileLog):
+                    self.start_ruta(ruta)
+                    try:
+                        self.getTypeTrack();
+                    except Exception as e:
+                        fileLog.write('Warning: '+str(e)+'\n')
+                    try:
+                        self.getTrailRank()
+                    except Exception as e:
+                        fileLog.write('Warning: '+str(e)+'\n') 
+                    try:
+                        self.getUserRank();
+                    except Exception as e:
+                        fileLog.write('Warning: '+str(e)+'\n')  
+                    try:   
+                        self.getDataTrack();
+                    except Exception as e:
+                        fileLog.write('Warning: '+str(e)+'\n')   
+                    try:
+                        self.getDateCreation();
+                    except Exception as e:
+                        fileLog.write('Warning: '+str(e)+'\n')
+                    try:
+                        self.getVotes();
+                    except Exception as e:
+                        fileLog.write('Warning: '+str(e)+'\n')
+                    try:
+                        self.getCards();
+                    except Exception as e:
+                        fileLog.write('Warning: '+str(e)+'\n')
+                    data["url" + str(idx)] = self.data
+                print('.',end='')
+                fileLog.flush()
+        except Exception as e:
+            raise Exception("Method scrape(): Error: {0}".format(e))
+        finally:        
+            self.stop()
         return data
         
     """
@@ -243,15 +254,12 @@ class Scrapper(object):
             url_actual = url_principal + actual_page
             if self.__isAllowed(url_actual, fileLog):
                 try:
+                    print('.',end='')
                     #Descarreguem la pàgina url_actual
                     htmlDom = self.__download_page(url_actual);
                     soup = BeautifulSoup(htmlDom,'html.parser');
                     if (soup.find(id="trails") == None):
-                        raise Exception('Soup Error: There arent trail links for ' + url_actual); 
-                except Exception as e:
-                    fileLog.write(str(e)+'\n')
-                    break
-                else:
+                        raise Exception('Soup Error: There arent trail links for ' + url_actual);
                     #Recorrem totes les rutes de la pàgina
                     for row in soup.find(id="trails").find_all_next('div', 'row'):
                         #print(row.find('a', 'rating-container')) #Test
@@ -260,6 +268,9 @@ class Scrapper(object):
                     next = soup.find('a', 'next')
                     if next != None:
                         actual_page = next.get('href')
+                except Exception as e:
+                    fileLog.write(str(e)+'\n')
+                    break
             else:
                 break
         fileLog.write('Num rutes valorades a '+url_principal+' -> '+str(len(url_rutes_regio2))+'\n')
@@ -292,7 +303,7 @@ class Scrapper(object):
                 self.__data['Url'] = paramUrl;
             """
         except Exception as e:
-            raise Exception("Method start(): Error: {0}".format(e));
+            raise Exception("Method start_ruta(): Error: {0}".format(e));
     
     """
     Desc:
@@ -554,7 +565,7 @@ class Scrapper(object):
 
         myValue:str = "";
         myText:list = None;
-        myPos:int = 0;
+        #myPos:int = 0;
         obj1:object = None;
         
         try:

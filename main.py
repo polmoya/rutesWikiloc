@@ -150,8 +150,8 @@ if __name__ == '__main__':
     
         data = myScrapper.scrape(activitat, pais, regio1, regio2, fileLog)
         fileLog.write('Rutes trobades = '+str(len(data))+'\n')
-        fileLog.write('Ruta de les dades: '+pathcsvfile)
-        print('Rutes trobades = '+str(len(data)))
+        fileLog.write('Ruta de les dades: '+pathcsvfile+'\n')
+        print('\nRutes trobades = '+str(len(data)))
         writeCSV(data, pathcsvfile)
             
     except Exception as e:
@@ -161,7 +161,7 @@ if __name__ == '__main__':
         del myDictData;
         del myRobotParser;
         elapsed = (datetime.datetime.now() - initDate).total_seconds();
-        fileLog.write(str(datetime.datetime.now()) + ' ========= Elapsed Time: ' + str(elapsed) + '==========\n');
+        fileLog.write(str(datetime.datetime.now()) + ' ========= Elapsed Time: ' + str(elapsed) + ' segons ==========\n');
         fileLog.write(str(datetime.datetime.now()) + ' ========= End The Web Scrapping ==========\n');
         fileLog.close()
 
