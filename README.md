@@ -11,6 +11,10 @@ pip3 install BeautifulSoup4
 pip3 install lxml
 pip3 install protego
 ```
+## Fitxers
+Els arxius que composen el projecte són 4:
+* main.py: encarregat d' inicar l' execució del programa
+
 
 ## Ús
 
