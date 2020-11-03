@@ -14,6 +14,9 @@ pip3 install protego
 ## Fitxers
 Els arxius que composen el projecte són 4:
 * main.py: encarregat d' inicar l' execució del programa
+* ClassScrapper.py: conté els mètodes necessaris per a realitzar Web Scraping sobre les diferents pàgines que s'han de manegar.
+* ClassRobotParser.py: conté els mètodes necessaris per a validar si les url's a les que volem accedir estan permesses pel fitxer "Robots.txt".
+* constants.py: conté tot un seguit de constants que els diferents fitxers utilitzen.
 
 
 ## Ús
