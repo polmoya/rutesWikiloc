@@ -116,7 +116,7 @@ Arguments que es poden introduir:
 * regio2: Seria exactament igual que la regio1 però en el següent nivell de profunditat, per tant:  `https://ca.wikiloc.com/rutes/outdoor/{nomPais}/{regio1}/{regio2}`.
 ## Membres de l'equip
 
-La pràctica s'ha realitzat per **Xavier Martin** i **Pol Moya Betriu**.
+La pràctica ha estat realitzada per **Xavier Martin Bravo** i **Pol Moya Betriu**.
 
 ## Llicència
 
