@@ -13,11 +13,13 @@ pip3 install protego
 ```
 ## Fitxers
 Els arxius que composen el projecte són 4:
-* main.py: encarregat d' inicar l' execució del programa
-* ClassScrapper.py: conté els mètodes necessaris per a realitzar Web Scraping sobre les diferents pàgines que s'han de manegar.
+* main.py: encarregat d' iniciar l' execució del programa i crear el csv resultant.
 * ClassRobotParser.py: conté els mètodes necessaris per a validar si les url's a les que volem accedir estan permesses pel fitxer "Robots.txt".
+* ClassScrapper.py: conté els mètodes necessaris per a realitzar Web Scraping sobre les diferents pàgines que s'han de manegar.
 * constants.py: conté tot un seguit de constants que els diferents fitxers utilitzen.
-
+* main.log: conté el log resultant d'executar el programa amb els paràmetres activity: "outdoor", pais: "espanya", regio1: "catalunya", regio2: "-1".
+* rutes_outdoor_espanya_catalunya.csv: Dataset resultant d'executar el programa amb els paràmetres activity: "outdoor", pais: "espanya", regio1: "catalunya", regio2: "-1".
+* Practica1.pdf: Conté la documentació de la pràctica.
 
 ## Ús
 
