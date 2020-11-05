@@ -120,6 +120,10 @@ Arguments que es poden introduir:
 
 La pràctica ha estat realitzada per **Xavier Martin Bravo** i **Pol Moya Betriu**.
 
+## DOI
+
+10.5281/zenodo.4246805
+
 ## Llicència
 
 CC BY-NC-SA 4.0 License
